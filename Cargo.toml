@@ -3,4 +3,6 @@
 members = [
     "frusk",
     "frusk-core",
+
+    "examples/server"
 ]
