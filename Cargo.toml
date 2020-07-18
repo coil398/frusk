@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "frusk",
+    "frusk-core",
+]
