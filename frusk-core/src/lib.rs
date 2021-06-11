@@ -1,49 +1,43 @@
-use futures::executor::block_on;
+// use futures::executor::block_on;
 use futures::executor::ThreadPool;
-use futures_timer::Delay;
+use futures::prelude::*;
 use mio::net::{TcpListener, TcpStream};
 use std::fs;
 use std::io::prelude::*;
 use std::io::ErrorKind;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use std::time::Duration;
 
-pub async fn run() {
-    let pool = ThreadPool::new().expect("Failed to build pool");
+mod tcp;
+use tcp::Listener;
 
-    let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
-    let listener = TcpListener::bind(socket).unwrap();
-    loop {
-        match listener.accept() {
-            Ok((stream, _)) => {
-                println!("Ok");
-                pool.spawn_ok(handle_connection(stream));
-                println!("done");
-            }
-            Err(err) => {
-                match err.kind() {
-                    ErrorKind::WouldBlock => {
-                        continue;
-                    }
-                    d => {
-                        println!("error: {:?}", d);
-                    }
-                }
-                if err.kind() == ErrorKind::WouldBlock {
-                    continue;
-                }
-            }
-        }
-    }
+pub fn create_listener(host: &str, port: u16) -> TcpListener {
+    let host_vec: Vec<u8> = host.split(".").map(|x| x.parse::<u8>().unwrap()).collect();
+    println!("host_vec {:?}", host_vec);
+    let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port);
+    TcpListener::bind(socket).unwrap()
 }
 
-async fn handle_connection(mut stream: TcpStream) {
+pub async fn handle_connection(mut stream: TcpStream) {
     println!("handle_connection");
-    Delay::new(Duration::from_secs(3)).await;
 
-    // Read the first 1024 bytes of data from the stream
-    let mut buffer = [0; 1024];
-    stream.read(&mut buffer).unwrap();
+    let mut buffer = [0; 2048];
+    loop {
+        match stream.read(&mut buffer) {
+            Ok(n) => {
+                println!("n: {}", n);
+                break;
+            }
+            Err(err) => match err.kind() {
+                ErrorKind::WouldBlock => {
+                    continue;
+                }
+                d => {
+                    println!("stream error: {:?}", d);
+                    return;
+                }
+            },
+        }
+    }
 
     let get = b"GET / HTTP/1.1\r\n";
 
