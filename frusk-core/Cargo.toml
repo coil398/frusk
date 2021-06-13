@@ -9,6 +9,7 @@ description = "The core crate for frusk"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-futures = { version = "0.3.12", features = ["thread-pool"] }
+futures = { version = "0.3.15", features = ["thread-pool"] }
 futures-timer = "3.0.2"
-mio = { version = "0.7.7", features = ["tcp", "os-poll"] }
+mio = { version = "0.7.11", features = ["tcp", "os-poll"] }
+thiserror = "1.0.25"

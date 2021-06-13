@@ -12,8 +12,18 @@ use tcp::Listener;
 
 pub fn create_listener(host: &str, port: u16) -> TcpListener {
     let host_vec: Vec<u8> = host.split(".").map(|x| x.parse::<u8>().unwrap()).collect();
-    println!("host_vec {:?}", host_vec);
-    let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port);
+    if host_vec.len() != 4 {
+        println!("Invalid host given");
+    }
+    let socket = SocketAddr::new(
+        IpAddr::V4(Ipv4Addr::new(
+            host_vec[0],
+            host_vec[1],
+            host_vec[2],
+            host_vec[3],
+        )),
+        port,
+    );
     TcpListener::bind(socket).unwrap()
 }
 
